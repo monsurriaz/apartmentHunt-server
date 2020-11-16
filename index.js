@@ -3,7 +3,7 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const MongoClient = require('mongodb').MongoClient;
 require('dotenv').config();
-// const fileUpload = require('express-fileupload');
+const fileUpload = require('express-fileupload');
 const fs = require('fs-extra')
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.x3yya.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority`;
@@ -11,7 +11,7 @@ const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster
 const app = express();
 app.use(bodyParser.json());
 app.use(cors());
-
+app.use(fileUpload());
 
 const port = 5000;
 
@@ -21,8 +21,8 @@ app.get('/', (req, res) => {
 
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
 client.connect(err => {
-  const rentApartmentCollection = client.db("apartmentHunt").collection("apartmentsList");
-  const apartmentCollection = client.db("apartmentHunt").collection("apartments");
+  const apartmentCollection = client.db("apartmentHunt").collection("apartmentsList");
+  const rentApartmentCollection = client.db("apartmentHunt").collection("rentApartmentList");
   const adminCollection = client.db("apartmentHunt").collection("admins");
 
 
@@ -41,7 +41,7 @@ client.connect(err => {
     })
   });
 
-  app.get('AllBookingList', (req, res) => {
+  app.get('/allBookingList', (req, res) => {
       rentApartmentCollection.find({})
       .toArray((err, allRent) => {
           res.send(allRent)
@@ -49,14 +49,37 @@ client.connect(err => {
   });
 
 
-  app.post('addApartment', (req, res) => {
+  // app.post('/addApartment', (req, res) => {
+  //   const file = req.files.file;
+  //   const title = req.body.title;
+  //   const description = req.body.description;
+  //   const price = req.body.price;
+  //   const location = req.body.location;
+  //   const bedroom = req.body.bedroom;
+  //   const bathroom = req.body.bathroom;
+  //   const pricedetail = req.body.pricedetail;
+  //   const propertydetail = req.body.propertydetail;
+  //   const newImg = file.data;
+  //   const encImg = newImg.toString('base64');
+
+  //   var image = {
+  //     contentType: file.mimetype,
+  //     size: file.size,
+  //     img: Buffer.from(encImg, 'base64')
+  //   };
+
+  //   apartmentCollection.insertOne({ title, description, price, pricedetail, propertydetail, location, bedroom, bathroom, image })
+  //     .then(result => {
+  //       res.send(result.insertedCount > 0)
+  //     })
+  // });
+
+  app.post('/addApartment', (req, res) => {
     const file = req.files.file;
     const title = req.body.title;
-    const price = req.body.price;
-    const location = req.body.location;
-    const bedroom = req.body.bedroom;
-    const bathroom = req.body.bathroom;
     const description = req.body.description;
+    console.log(file, title, description);
+
     const newImg = file.data;
     const encImg = newImg.toString('base64');
 
@@ -66,7 +89,7 @@ client.connect(err => {
       img: Buffer.from(encImg, 'base64')
     };
 
-    apartmentCollection.insertOne({ title, price, location, bedroom, bathroom, description, image })
+    apartmentCollection.insertOne({ title, description, image })
       .then(result => {
         res.send(result.insertedCount > 0)
       })
@@ -75,6 +98,7 @@ client.connect(err => {
 
   app.post('/addAdmin', (req, res) => {
     const admin = req.body;
+    console.log(admin);
     adminCollection.insertOne(admin)
     .then(result => {
       res.send(result.insertedCount > 0)
