@@ -11,6 +11,7 @@ const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster
 const app = express();
 app.use(bodyParser.json());
 app.use(cors());
+app.use(express.static('apartments'))
 app.use(fileUpload());
 
 const port = 5000;
@@ -49,37 +50,16 @@ client.connect(err => {
   });
 
 
-  // app.post('/addApartment', (req, res) => {
-  //   const file = req.files.file;
-  //   const title = req.body.title;
-  //   const description = req.body.description;
-  //   const price = req.body.price;
-  //   const location = req.body.location;
-  //   const bedroom = req.body.bedroom;
-  //   const bathroom = req.body.bathroom;
-  //   const pricedetail = req.body.pricedetail;
-  //   const propertydetail = req.body.propertydetail;
-  //   const newImg = file.data;
-  //   const encImg = newImg.toString('base64');
-
-  //   var image = {
-  //     contentType: file.mimetype,
-  //     size: file.size,
-  //     img: Buffer.from(encImg, 'base64')
-  //   };
-
-  //   apartmentCollection.insertOne({ title, description, price, pricedetail, propertydetail, location, bedroom, bathroom, image })
-  //     .then(result => {
-  //       res.send(result.insertedCount > 0)
-  //     })
-  // });
-
   app.post('/addApartment', (req, res) => {
     const file = req.files.file;
     const title = req.body.title;
     const description = req.body.description;
-    console.log(file, title, description);
-
+    const price = req.body.price;
+    const location = req.body.location;
+    const bedroom = req.body.bedroom;
+    const bathroom = req.body.bathroom;
+    const pricedetail = req.body.pricedetail;
+    const propertydetail = req.body.propertydetail;
     const newImg = file.data;
     const encImg = newImg.toString('base64');
 
@@ -89,11 +69,32 @@ client.connect(err => {
       img: Buffer.from(encImg, 'base64')
     };
 
-    apartmentCollection.insertOne({ title, description, image })
+    apartmentCollection.insertOne({ title, description, price, pricedetail, propertydetail, location, bedroom, bathroom, image })
       .then(result => {
         res.send(result.insertedCount > 0)
       })
   });
+  
+
+  // app.post('/addApartment', (req, res) => {
+  //   const file = req.files.file;
+  //   const title = req.body.title;
+  //   const description = req.body.description;
+
+  //   const newImg = file.data;
+  //   const encImg = newImg.toString('base64');
+
+  //   var image = {
+  //     contentType: file.mimetype,
+  //     size: file.size,
+  //     img: Buffer.from(encImg, 'base64')
+  //   };
+
+  //   apartmentCollection.insertOne({ title, description, image })
+  //     .then(result => {
+  //       res.send(result.insertedCount > 0)
+  //     })
+  //   });
 
 
   app.post('/addAdmin', (req, res) => {
